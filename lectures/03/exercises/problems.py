@@ -38,13 +38,19 @@ class Countdown:
     """
 
     def __init__(self, n: int) -> None:
-        raise NotImplementedError
+        self.n = n
 
     def __iter__(self) -> Iterator[int]:
-        raise NotImplementedError
+        return self
 
     def __next__(self) -> int:
-        raise NotImplementedError
+        if self.n >= 0:
+            x = self.n
+            self.n -= 1
+            return x
+        else:
+            raise StopIteration
+            
 
 
 class StepIterator:
@@ -62,13 +68,24 @@ class StepIterator:
     """
 
     def __init__(self, values: list[Any], step: int = 2) -> None:
-        raise NotImplementedError
+        if step <= 0:
+            raise ValueError
+        else:
+            self.step = step
+        self.values = values
+        self.current = 0
 
     def __iter__(self) -> Iterator[Any]:
-        raise NotImplementedError
+        return self
 
     def __next__(self) -> Any:
-        raise NotImplementedError
+        if self.current < len(self.values):
+            x = self.values[self.current]
+            self.current += self.step
+            return x
+        else:
+            raise StopIteration
+
 
 
 class UniqueConsecutiveIterator:
@@ -82,13 +99,22 @@ class UniqueConsecutiveIterator:
     """
 
     def __init__(self, values: list[Any]) -> None:
-        raise NotImplementedError
+        self.values = values
+        self.current = 0
+        self.previous = None
+        self.start = False
 
     def __iter__(self) -> Iterator[Any]:
-        raise NotImplementedError
+        return self
 
     def __next__(self) -> Any:
-        raise NotImplementedError
+        while self.current < len(self.values):
+            value = self.values[self.current]
+            self.current += 1
+            if not self.started or value != self.previous:
+                self.previous = value
+                self.started = True
+                return value
 
 
 class CircularIterator:
@@ -103,13 +129,23 @@ class CircularIterator:
     """
 
     def __init__(self, sequence: Sequence[Any], k: int) -> None:
-        raise NotImplementedError
+        self.count = 0
+        if not sequence or k < 0:
+            raise ValueError
+        else:
+            self.sequence = sequence
+            self.k = k
 
     def __iter__(self) -> Iterator[Any]:
-        raise NotImplementedError
+        return self
 
     def __next__(self) -> Any:
-        raise NotImplementedError
+        while self.count < self.k:
+            value = self.sequence[self.count % len(self.sequence)]
+            self.count += 1
+            return value
+        else:
+            raise StopIteration
 
 
 class FlattenIterator:
@@ -124,13 +160,21 @@ class FlattenIterator:
     """
 
     def __init__(self, data: list[Any]) -> None:
-        raise NotImplementedError
+        self.data = data
+        self.index = 0
 
     def __iter__(self) -> Iterator[Any]:
-        raise NotImplementedError
+        return self
 
     def __next__(self) -> Any:
-        raise NotImplementedError
+        if self.index >= len(self.data):
+            raise StopIteration
+        item = self.data[self.index]
+        self.index += 1
+        if isinstance(item, list):
+            return from_iterable(item)
+        return item
+        
 
 
 def read_words(filename: str) -> Iterator[str]:
@@ -143,7 +187,10 @@ def read_words(filename: str) -> Iterator[str]:
     >>> list(read_words("sample.txt"))
     ['one', 'two', 'three']
     """
-    raise NotImplementedError
+    with open(filename, encoding="utf-8") as f:
+        for line in f:
+            for word in line.split():
+                yield word
 
 
 def batch(iterable: Iterable[Any], size: int) -> Iterator[list[Any]]:
@@ -156,7 +203,18 @@ def batch(iterable: Iterable[Any], size: int) -> Iterator[list[Any]]:
     >>> list(batch([1, 2, 3, 4, 5, 6, 7], 3))
     [[1, 2, 3], [4, 5, 6], [7]]
     """
-    raise NotImplementedError
+    if size <= 0:
+        raise ValueError
+
+    group = []
+    for item in iterable:
+        group.append(item)
+        if len(group) == size:
+            yield group
+            group = []
+
+    if group:
+        yield group
 
 
 def flatten(data: list[Any]) -> Iterator[Any]:
@@ -168,7 +226,11 @@ def flatten(data: list[Any]) -> Iterator[Any]:
     >>> list(flatten([1, [2, 3], [4, [5, 6]], 7]))
     [1, 2, 3, 4, 5, 6, 7]
     """
-    raise NotImplementedError
+    for item in data:
+        if isinstance(item, list):
+            yield from flatten(item)
+        else:
+            yield item
 
 
 def log_calls(func: Callable[..., Any]) -> Callable[..., Any]:

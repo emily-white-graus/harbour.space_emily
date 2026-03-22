@@ -42,7 +42,16 @@ def log_calls(func: Callable[..., Any]) -> Callable[..., Any]:
     add(2, 3) -> 5
     5
     """
-    raise NotImplementedError
+    def decorator(*args, **kwargs):
+        result = func(*args, **kwargs)
+        args_str = ", ".join(repr(arg) for arg in args)
+        kwargs_str = ", ".join(f"{k}={v!r}" for k, v in kwargs.items())
+        all_args = ", ".join(filter(None, [args_str, kwargs_str]))
+        print(f"{func.__name__}({all_args}) -> {result!r}")
+        return result
+    return decorator
+
+
 
 
 def measure_time(func: Callable[..., Any]) -> Callable[..., Any]:
@@ -62,8 +71,17 @@ def measure_time(func: Callable[..., Any]) -> Callable[..., Any]:
     >>> work()
     done
     """
-    raise NotImplementedError
+    import time
 
+    def decorator(*args, **kwargs):
+        start_time = time.perf_counter()
+        result = func(*args, **kwargs)
+        end_time = time.perf_counter()
+        elapsed_ms = (end_time - start_time) * 1000
+        print(f"Executed in {elapsed_ms:.2f} ms")
+        return result
+
+    return decorator
 
 def count_calls(func: Callable[..., Any]) -> Callable[..., Any]:
     """Problem 3. `count_calls` decorator.
@@ -80,7 +98,12 @@ def count_calls(func: Callable[..., Any]) -> Callable[..., Any]:
     >>> ping.calls
     2
     """
-    raise NotImplementedError
+    def decorator(*args, **kwargs):
+        decorator.calls += 1
+        return func(*args, **kwargs)
+
+    decorator.calls = 0
+    return decorator
 
 
 def ensure_non_negative(func: Callable[..., Any]) -> Callable[..., Any]:
@@ -95,7 +118,12 @@ def ensure_non_negative(func: Callable[..., Any]) -> Callable[..., Any]:
     >>> diff(5, 2)
     3
     """
-    raise NotImplementedError
+    def decorator(*args, **kwargs):
+        result = func(*args, **kwargs)
+        if result < 0:
+            raise ValueError("Negative result")
+        return result
+    return decorator
 
 
 class Retry:
@@ -115,10 +143,19 @@ class Retry:
     """
 
     def __init__(self, times: int) -> None:
-        raise NotImplementedError
+        if times < 0:
+            raise ValueError("Invalid retry count")
+        self.times = times
 
     def __call__(self, func: Callable[..., Any]) -> Callable[..., Any]:
-        raise NotImplementedError
+        def wrapper(*args, **kwargs):
+            for attempt in range(self.times + 1):
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    if attempt == self.times:
+                        raise
+        return wrapper
 
 
 class Throttle:
@@ -156,7 +193,24 @@ class Throttle:
     - Implement this as a class decorator
     """
 
-    pass
+        def __init__(self, interval: float) -> None:
+            if interval < 0:
+                raise ValueError("Invalid interval")
+            self.interval = interval
+            self.last_call_time = None
+    
+        def __call__(self, func: Callable[..., Any]) -> Callable[..., Any]:
+            import time
+    
+            def wrapper(*args, **kwargs):
+                current_time = time.perf_counter()
+                if self.last_call_time is not None and (current_time - self.last_call_time) < self.interval:
+                    raise RuntimeError("Too many calls")
+                result = func(*args, **kwargs)
+                self.last_call_time = current_time
+                return result
+    
+            return wrapper
 
 
 class CallLimit:

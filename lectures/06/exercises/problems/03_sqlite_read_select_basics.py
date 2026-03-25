@@ -18,13 +18,27 @@ def main() -> None:
 
     # TODO: SELECT * FROM students
     # rows = cur.fetchall()
+    cur.execute("SELECT * FROM students")
+    rows = cur.fetchall()
+    print("All students:")
+    for row in rows:
+        print(row)
 
     # TODO: SELECT name, email FROM students
     # name_email_rows = cur.fetchall()
+    cur.execute("SELECT name, email FROM students")
+    name_email_rows = cur.fetchall()
+    print("\nNames and emails:")
+    for row in name_email_rows:
+        print(row)
 
     # TODO: SELECT one row for ana@example.com
     # one_row = cur.fetchone()
-
+    cur.execute("SELECT * FROM students WHERE email = ?", ("ana@example.com",))
+    email_row = cur.fetchone()
+    print("Row by email:")
+    print(email_row)
+    
     conn.close()
 
 

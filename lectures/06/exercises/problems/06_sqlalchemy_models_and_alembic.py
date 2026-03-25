@@ -12,7 +12,7 @@ Steps:
 2. Complete models in `problems/db_models.py`:
    - Student (existing table)
    - Assignment (new related table)
-3. From lectures/06/exercises run:
+3. From lectures/06/exercises run: 
        alembic init migrations
 4. Update `alembic.ini`:
        sqlalchemy.url = sqlite:///school.db

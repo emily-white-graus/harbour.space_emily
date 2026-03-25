@@ -1,19 +1,12 @@
-"""Problem 02: Write rows into `students` using sqlite3.
+   CREATE TABLE IF NOT EXISTS students (
+       id INTEGER PRIMARY KEY,
+       name TEXT NOT NULL,
+       age INTEGER NOT NULL,
+       email TEXT UNIQUE NOT NULL,
+       track TEXT NOT NULL
+   );
 
-Task:
-1. Connect to `school.db`
-2. Insert all rows from STUDENTS into `students`
-3. Commit changes
-4. Print how many rows were inserted
-
-Tip:
-- Use `executemany` with placeholders `(?, ?, ?, ?)`.
-"""
-
-import sqlite3
-from pathlib import Path
-
-DB_PATH = Path(__file__).resolve().parent.parent / "school.db"
+---
 
 STUDENTS = [
     ("Ana", 21, "ana@example.com", "backend"),
@@ -22,10 +15,7 @@ STUDENTS = [
     ("Marta", 20, "marta@example.com", "frontend"),
     ("Ivan", 23, "ivan@example.com", "data"),
 ]
-
-
-def main() -> None:
-    conn = sqlite3.connect(DB_PATH)
+conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
 
     cur.executemany(
@@ -37,6 +27,8 @@ def main() -> None:
     print("Inserted rows:", len(STUDENTS))
     conn.close()
 
+---
 
-if __name__ == "__main__":
-    main()
+cur.execute("SELECT * FROM students")
+    rows = cur.fetchall()
+

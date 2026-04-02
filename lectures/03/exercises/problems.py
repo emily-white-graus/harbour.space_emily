@@ -102,7 +102,7 @@ class UniqueConsecutiveIterator:
         self.values = values
         self.current = 0
         self.previous = None
-        self.start = False
+        self.started = False
 
     def __iter__(self) -> Iterator[Any]:
         return self
@@ -115,6 +115,7 @@ class UniqueConsecutiveIterator:
                 self.previous = value
                 self.started = True
                 return value
+        raise StopIteration
 
 
 class CircularIterator:
@@ -232,6 +233,7 @@ def flatten(data: list[Any]) -> Iterator[Any]:
         else:
             yield item
 
+# ----- DECORATORS IN NEXT LECTURE -----
 
 def log_calls(func: Callable[..., Any]) -> Callable[..., Any]:
     """Problem 9. `log_calls` decorator.

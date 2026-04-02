@@ -38,9 +38,9 @@ class BankAccount:
     
   def withdraw(self, amount: float) -> None:
     if amount <= 0:
-            return
+      return
     if amount > self.balance:
-            return
+      return
     self.balance -= amount
 
 

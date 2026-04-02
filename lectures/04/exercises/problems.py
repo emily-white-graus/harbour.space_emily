@@ -21,6 +21,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from typing import Any
+import time
 
 
 def log_calls(func: Callable[..., Any]) -> Callable[..., Any]:
@@ -193,24 +194,27 @@ class Throttle:
     - Implement this as a class decorator
     """
 
-        def __init__(self, interval: float) -> None:
-            if interval < 0:
-                raise ValueError("Invalid interval")
-            self.interval = interval
-            self.last_call_time = None
-    
-        def __call__(self, func: Callable[..., Any]) -> Callable[..., Any]:
-            import time
-    
-            def wrapper(*args, **kwargs):
-                current_time = time.perf_counter()
-                if self.last_call_time is not None and (current_time - self.last_call_time) < self.interval:
-                    raise RuntimeError("Too many calls")
-                result = func(*args, **kwargs)
-                self.last_call_time = current_time
-                return result
-    
-            return wrapper
+    def __init__(self, interval: float) -> None:
+        if interval < 0:
+            raise ValueError("Invalid interval")
+        self.interval = interval
+
+    def __call__(self, func: Callable[..., Any]) -> Callable[..., Any]:
+        last_call_time = None
+
+        def wrapper(*args, **kwargs):
+            nonlocal last_call_time
+
+            current_time = time.perf_counter()
+
+            if last_call_time is not None and (current_time - last_call_time) < self.interval:
+                raise RuntimeError("Too many calls")
+
+            result = func(*args, **kwargs)
+            last_call_time = current_time
+            return result
+
+        return wrapper
 
 
 class CallLimit:

@@ -20,7 +20,24 @@ SENDER_NAME = "replace-with-your-name"
 
 def main() -> None:
     # TODO: implement input loop and POST sending
-    pass
+    while True:
+        text = input("Message (or 'quit'): ").strip()
+        if text.lower() == "quit":
+            break
+        if not text:
+            continue
+
+        response = requests.post(
+            f"{TARGET_BASE_URL}/messages",
+            json={"sender": SENDER_NAME, "text": text},
+            timeout=10,
+        )
+
+        print("Status:", response.status_code)
+        try:
+            print("Response:", response.json())
+        except ValueError:
+            print("Response:", response.text)
 
 
 if __name__ == "__main__":
